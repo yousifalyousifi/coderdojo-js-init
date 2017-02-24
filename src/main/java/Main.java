@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import static spark.Spark.*;
 
 public class Main {
@@ -53,6 +57,16 @@ public class Main {
         return new ModelAndView(attributes, "error.ftl");
       }
     }, new FreeMarkerEngine());
+    
+    get("/nashorn", (req, res)  -> {
+    	ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+		String input = "var fun1 = function() { console.log('hi') };";
+		engine.eval(input);
+		Invocable invocable = (Invocable) engine;
+
+		Object result = invocable.invokeFunction("fun1");
+		return "";
+    });
 
   }
 
