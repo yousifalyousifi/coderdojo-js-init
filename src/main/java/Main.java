@@ -60,12 +60,12 @@ public class Main {
     
     get("/nashorn", (req, res)  -> {
     	ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-		String input = "var fun1 = function() { console.log('hi') };";
+		String input = "var fun1 = function() { return 'hahahahaha NASHORN'; };";
 		engine.eval(input);
 		Invocable invocable = (Invocable) engine;
 
 		Object result = invocable.invokeFunction("fun1");
-		return "";
+		return result.toString();
     });
 
   }
