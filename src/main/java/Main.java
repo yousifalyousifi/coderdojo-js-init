@@ -1,7 +1,6 @@
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import spark.ModelAndView;
-import spark.template.freemarker.FreeMarkerEngine;
+import static spark.Spark.get;
+import static spark.Spark.port;
+import static spark.Spark.staticFileLocation;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,7 +13,12 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import static spark.Spark.*;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import spark.ModelAndView;
+import spark.route.RouteOverview;
+import spark.template.freemarker.FreeMarkerEngine;
 
 public class Main {
 
@@ -22,7 +26,8 @@ public class Main {
 
     port(Integer.valueOf(System.getenv("PORT")));
     staticFileLocation("/public");
-
+    RouteOverview.enableRouteOverview(); 
+    
     get("/hello", (req, res) -> "Hello World");
 
     get("/", (request, response) -> {
@@ -36,7 +41,6 @@ public class Main {
     config.setJdbcUrl(System.getenv("JDBC_DATABASE_URL"));
     final HikariDataSource dataSource = (config.getJdbcUrl() != null) ?
       new HikariDataSource(config) : new HikariDataSource();
-
     get("/db", (req, res) -> {
       Map<String, Object> attributes = new HashMap<>();
       try(Connection connection = dataSource.getConnection()) {
