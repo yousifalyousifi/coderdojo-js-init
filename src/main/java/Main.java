@@ -27,7 +27,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			port(8080);// Integer.valueOf(System.getenv("PORT")));
+			port(Integer.valueOf(System.getenv("PORT")));
 			staticFileLocation("/public");
 
 			get("/hello", (req, res) -> "Hello World");
