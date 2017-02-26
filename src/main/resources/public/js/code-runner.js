@@ -54,7 +54,7 @@ function CodeRunner(outputId) {
 	function scrollToBottom() {
 		// var d = $('#' + me.outputId);
 		// d.scrollTop(d.prop("scrollHeight"));
-		$('#' + me.outputId).animate({ scrollTop: $('#' + me.outputId).prop("scrollHeight")}, 300);
+		$('#' + me.outputId).animate({ scrollTop: $('#' + me.outputId).prop("scrollHeight")}, 500);
 	};
 
 	function getHTMLForOutput(value, withQuotesIfString) {
