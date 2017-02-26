@@ -33,11 +33,14 @@ public class Main {
 			get("/hello", (req, res) -> "Hello World");
 
 			get("/", (request, response) -> {
-				Map<String, Object> attributes = new HashMap<>();
-				attributes.put("message", "Hello World!");
+				response.redirect("editor.html"); 
+				return null;
+			});
 
-				return new ModelAndView(attributes, "index.ftl");
-			} , new FreeMarkerEngine());
+			get("/editor", (request, response) -> {
+				response.redirect("editor.html"); 
+				return null;
+			});
 
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(System.getenv("JDBC_DATABASE_URL"));
@@ -73,11 +76,6 @@ public class Main {
 
 				Object result = invocable.invokeFunction("fun1");
 				return result.toString();
-			});
-
-			get("/editor", (request, response) -> {
-				response.redirect("editor.html"); 
-				return null;
 			});
 
 		} catch (Throwable e) {
