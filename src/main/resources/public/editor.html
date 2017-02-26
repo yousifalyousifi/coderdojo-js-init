@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>CoderDojo JS Editor</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.cyborg.css" rel="stylesheet">
     <style type="text/css" media="screen">
     body {
         overflow: hidden;
@@ -28,7 +28,7 @@
         top: 70px;
         bottom: 0px;
         left: 0;
-        right: 50%;
+        right: 51%;
     }
     #displayContainer {
         overflow: auto;
@@ -42,6 +42,7 @@
     }
     #displayContainer pre {
         color: lightgrey;
+        border-style: none;
         background-color: rgb(39,40,34);
         overflow: auto;
         margin: 0;
@@ -128,9 +129,9 @@ function foo(items) {
 }
 foo(["hi",2]);
 var obj = {};
-var objj = {key: "value", key2: 2};
+var objj = {key: "value", key2: 2, "key3": null, "key4": undefined};
 var arr = [];
-var arrr = ["adwd", 23, 93, "231"];
+var arrr = ["adwd", undefined, 23, 93, "231", null];
 
 console.log(obj);
 console.log(objj);

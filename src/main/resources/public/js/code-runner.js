@@ -58,7 +58,11 @@ function CodeRunner(outputId) {
 	};
 
 	function getHTMLForOutput(value, withQuotesIfString) {
-		if(typeof value == "object") {
+		if(value === null) {
+			return handleNull();
+		} else if (value === undefined) {
+			return handleUndefined();
+		} else if(typeof value == "object") {
 			//cyclic relationships will cause a stackoverflow
 			//but the browser will take care of terminating it after 20 seconds or so
 			if(Array.isArray(value)) {
@@ -74,6 +78,18 @@ function CodeRunner(outputId) {
 			return handleBoolean(value);
 		}
 
+		function handleNull() {
+			var s = $(document.createElement("span"));
+			s.addClass("booleanOutput");
+			s.text("null");
+			return s;
+		}
+		function handleUndefined(value) {
+			var s = $(document.createElement("span"));
+			s.addClass("greyOutput");
+			s.text("undefined");
+			return s;
+		}
 		function handleBoolean(value) {
 			var s = $(document.createElement("span"));
 			s.addClass("booleanOutput");
