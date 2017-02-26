@@ -7,16 +7,23 @@ function CodeRunner(outputId) {
 	function replaceConsole(outputId) {
 		console.log("Replacing console.");
 		if (typeof console  != "undefined") 
-		    if (typeof console.log != 'undefined')
+		    if (typeof console.log != 'undefined') {
 		        console.olog = console.log;
-		    else
-		        console.olog = function() {};
+		        console.oerror = console.error;
+		    } else {
+		    	console.olog = function() {};
+		    	console.oerror = function() {};
+		    }     
 
 		console.log = function(message) {
 		    console.olog(message);
 		    newconsole(message);
 		};
-		console.error = console.debug = console.info = console.log;
+		console.error = function(message) {
+		    console.oerror(message);
+		    newerror(message);
+		};
+		console.debug = console.info = console.log;
 	};
 
 	function newconsole(message) {
@@ -29,7 +36,7 @@ function CodeRunner(outputId) {
 	function newerror(message) {
 		var line = $(document.createElement("p"));
 		line.addClass("codeOutputError");
-		line.text(message);
+		line.text(" " + message);
 		$('#' + me.outputId).append(line);
 	};
 
