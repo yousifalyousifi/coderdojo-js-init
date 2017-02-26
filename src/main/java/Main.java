@@ -1,5 +1,8 @@
 import static spark.Spark.get;
 import static spark.Spark.port;
+import static spark.Spark.stop;
+import static spark.Spark.init;
+import static spark.Spark.staticFiles;
 import static spark.Spark.staticFileLocation;
 
 import java.sql.Connection;
@@ -22,56 +25,68 @@ import spark.template.freemarker.FreeMarkerEngine;
 
 public class Main {
 
-  public static void main(String[] args) {
+	public static void main(String[] args) {
+		try {
+			port(8080);// Integer.valueOf(System.getenv("PORT")));
+			staticFileLocation("/public");
 
-    port(Integer.valueOf(System.getenv("PORT")));
-    staticFileLocation("/public");
-    RouteOverview.enableRouteOverview(); 
-    
-    get("/hello", (req, res) -> "Hello World");
+			get("/hello", (req, res) -> "Hello World");
 
-    get("/", (request, response) -> {
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("message", "Hello World!");
+			get("/", (request, response) -> {
+				Map<String, Object> attributes = new HashMap<>();
+				attributes.put("message", "Hello World!");
 
-        return new ModelAndView(attributes, "index.ftl");
-    }, new FreeMarkerEngine());
+				return new ModelAndView(attributes, "index.ftl");
+			} , new FreeMarkerEngine());
 
-    HikariConfig config = new  HikariConfig();
-    config.setJdbcUrl(System.getenv("JDBC_DATABASE_URL"));
-    final HikariDataSource dataSource = (config.getJdbcUrl() != null) ?
-      new HikariDataSource(config) : new HikariDataSource();
-    get("/db", (req, res) -> {
-      Map<String, Object> attributes = new HashMap<>();
-      try(Connection connection = dataSource.getConnection()) {
-        Statement stmt = connection.createStatement();
-        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-        stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-        ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
+			HikariConfig config = new HikariConfig();
+			config.setJdbcUrl(System.getenv("JDBC_DATABASE_URL"));
+			final HikariDataSource dataSource = (config.getJdbcUrl() != null) ? new HikariDataSource(config)
+					: new HikariDataSource();
 
-        ArrayList<String> output = new ArrayList<String>();
-        while (rs.next()) {
-          output.add( "Read from DB: " + rs.getTimestamp("tick"));
-        }
+			get("/db", (req, res) -> {
+				Map<String, Object> attributes = new HashMap<>();
+				try (Connection connection = dataSource.getConnection()) {
+					Statement stmt = connection.createStatement();
+					stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
+					stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
+					ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
 
-        attributes.put("results", output);
-        return new ModelAndView(attributes, "db.ftl");
-      } catch (Exception e) {
-        attributes.put("message", "There was an error: " + e);
-        return new ModelAndView(attributes, "error.ftl");
-      }
-    }, new FreeMarkerEngine());
-    
-    get("/nashorn", (req, res)  -> {
-    	ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-		String input = "var fun1 = function() { return 'hahahahaha NASHORN'; };";
-		engine.eval(input);
-		Invocable invocable = (Invocable) engine;
+					ArrayList<String> output = new ArrayList<String>();
+					while (rs.next()) {
+						output.add("Read from DB: " + rs.getTimestamp("tick"));
+					}
 
-		Object result = invocable.invokeFunction("fun1");
-		return result.toString();
-    });
+					attributes.put("results", output);
+					return new ModelAndView(attributes, "db.ftl");
+				} catch (Exception e) {
+					attributes.put("message", "There was an error: " + e);
+					return new ModelAndView(attributes, "error.ftl");
+				}
+			} , new FreeMarkerEngine());
 
-  }
+			get("/nashorn", (req, res) -> {
+				ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+				String input = "var fun1 = function() { return 'hahahahaha NASHORN'; };";
+				engine.eval(input);
+				Invocable invocable = (Invocable) engine;
+
+				Object result = invocable.invokeFunction("fun1");
+				return result.toString();
+			});
+
+			get("/editor", (request, response) -> {
+				response.redirect("editor.html"); 
+				return null;
+			});
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void stopServer() {
+		stop();
+	}
 
 }
