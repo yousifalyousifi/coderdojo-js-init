@@ -59,7 +59,8 @@
         height: 70px;
     }
     .codeOutputError {
-        color: red;
+        color: rgb(216, 212, 212);
+        background-color: rgba(255, 0, 0, 0.43);
     }
     .codeOutput {
         color: grey;
@@ -110,10 +111,6 @@
                 <li><a id="font14px" href="#">14px</a></li>
                 <li><a id="font18px" href="#">18px</a></li>
                 <li><a id="font24px" href="#">24px</a></li>
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header">Nav header</li>
-                <li><a href="#">Separated link</a></li>
-                <li><a href="#">One more separated link</a></li>
               </ul>
             </li>
           </ul>
@@ -125,10 +122,11 @@
 <pre id="editor">
 function foo(items) {
     var i;
-    for (i = 0; i < items.length; i++) {
+    for (i = 0; i &lt; items.length; i++) {
         console.log("Ace Rocks " + items[i]);
     }
 }
+foo(["hi",2]);
 var obj = {};
 var objj = {key: "value", key2: 2};
 var arr = [];
@@ -141,12 +139,13 @@ console.log(arrr);
 console.log(324);
 console.log("strrrrIng://");
 console.log(true);
+g();
 </pre>
 </div>
 <div id="displayContainer">
 <pre>
-Console Output
-<hr class="codeRunSeparator">
+<span>Console Output</span>
+<hr class="codeRunSeparator"/>
 </pre>
 </div>
 <script src="js/ace.js" type="text/javascript" charset="utf-8"></script>

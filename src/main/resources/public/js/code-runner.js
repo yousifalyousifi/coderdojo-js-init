@@ -38,10 +38,10 @@ function CodeRunner(outputId) {
 	this.runThis = function(code) {
 		try {
 			eval(code);
-			insertCodeOutputSeparator();
 		} catch (e) {
-			newerror(e);
+			handleException(e);
 		}
+		insertCodeOutputSeparator();
 		scrollToBottom();
 	};
 
@@ -59,40 +59,34 @@ function CodeRunner(outputId) {
 
 	function getHTMLForOutput(value, withQuotesIfString) {
 		if(typeof value == "object") {
+			//cyclic relationships will cause a stackoverflow
+			//but the browser will take care of terminating it after 20 seconds or so
 			if(Array.isArray(value)) {
-				var s = $(document.createElement("span"));
-				var prefix = $(document.createElement("span")).addClass("typePrefixOutput");
-				prefix.text("Array");
-				s.append(prefix).append(squareOpen());
-				for(var i = 0; i < value.length; i++) {
-					s.append(getHTMLForOutput(value[i], true));
-					if(i != value.length - 1) { //last element
-						s.append(commaSeparator());
-					}
-				}
-				s.append(squareClose());
-				return s;
+				return handleArray(value); 
 			} else {
-				var s = $(document.createElement("span"));
-				var prefix = $(document.createElement("span")).addClass("typePrefixOutput");
-				prefix.text("Object");
-				s.append(prefix).append(curlyOpen());
-				var notEmpty = false;
-				for(var k in value) {
-					if(value.hasOwnProperty(k)) {
-						notEmpty = true;
-						var key = $(document.createElement("span")).addClass("keyOutput").text(k);
-						s.append(key);
-						s.append(colonSeparator());
-						s.append(getHTMLForOutput(value[k], true));
-						s.append(commaSeparator());
-					}
-				}
-				if(notEmpty) s[0].removeChild(s[0].lastChild); //remove last comma
-				s.append(curlyClose());
-				return s;
+				return handleObject(value);
 			}
 		} else if(typeof value == "string") {
+			return handleString(value);
+		} else if(typeof value == "number") {
+			return handleNumber(value);
+		} else if(typeof value == "boolean") {
+			return handleBoolean(value);
+		}
+
+		function handleBoolean(value) {
+			var s = $(document.createElement("span"));
+			s.addClass("booleanOutput");
+			s.text(value);
+			return s;
+		}
+		function handleNumber(value) {
+			var s = $(document.createElement("span"));
+			s.addClass("numberOutput");
+			s.text(value);
+			return s;
+		}
+		function handleString(value) {
 			var s = $(document.createElement("span"));
 			s.addClass("stringOutput");
 			if(withQuotesIfString) {
@@ -100,32 +94,40 @@ function CodeRunner(outputId) {
 			}
 			s.text(value);
 			return s;
-		} else if(typeof value == "number") {
-			var s = $(document.createElement("span"));
-			s.addClass("numberOutput");
-			s.text(value);
-			return s;
-		} else if(typeof value == "boolean") {
-			var s = $(document.createElement("span"));
-			s.addClass("booleanOutput");
-			s.text(value);
-			return s;
-		}
-
-		function handleBoolean(value) {
-
-		}
-		function handleNumber(value) {
-
-		}
-		function handleString(value) {
-
 		}
 		function handleObject(value) {
-
+			var s = $(document.createElement("span"));
+			var prefix = $(document.createElement("span")).addClass("typePrefixOutput");
+			prefix.text("Object");
+			s.append(prefix).append(curlyOpen());
+			var notEmpty = false;
+			for(var k in value) {
+				if(value.hasOwnProperty(k)) {
+					notEmpty = true;
+					var key = $(document.createElement("span")).addClass("keyOutput").text(k);
+					s.append(key);
+					s.append(colonSeparator());
+					s.append(getHTMLForOutput(value[k], true));
+					s.append(commaSeparator());
+				}
+			}
+			if(notEmpty) s[0].removeChild(s[0].lastChild); //remove last comma
+			s.append(curlyClose());
+			return s;
 		}
 		function handleArray(value) {
-
+			var s = $(document.createElement("span"));
+			var prefix = $(document.createElement("span")).addClass("typePrefixOutput");
+			prefix.text("Array");
+			s.append(prefix).append(squareOpen());
+			for(var i = 0; i < value.length; i++) {
+				s.append(getHTMLForOutput(value[i], true));
+				if(i != value.length - 1) { //last element
+					s.append(commaSeparator());
+				}
+			}
+			s.append(squareClose());
+			return s;
 		}
 		function squareOpen() {
 			return $(document.createElement("span")).addClass("greyOutput").text(" [ ");
@@ -144,6 +146,33 @@ function CodeRunner(outputId) {
 		}
 		function colonSeparator() {
 			return $(document.createElement("span")).addClass("greyOutput").text(": ");
+		}
+	}
+
+	function handleException(e) {
+		window.ee = e;
+		console.olog(e);
+		var matches = e.stack.match("(?:eval):\\d+"); //firefox
+		if(!matches) {
+			matches = e.stack.match("(?:anonymous>):\\d+"); //chrome
+			if(!matches) {
+				matches = e.stack.match("(?:code):\\d+"); //IE
+			}
+		}
+		if(matches && matches.length > 0) {
+			var lineNum;
+			if(e.lineNumber) {
+				lineNum = e.lineNumber; //firefox has this property
+			} else {
+				lineNum = matches[0].split(":")[1] || "??";	
+			}
+			newerror("Line " + lineNum + ": " + e);
+		} else {
+			var lineNum = "??";
+			if(e.lineNumber) {
+				lineNum = e.lineNumber; //firefox has this property
+			}
+			newerror("Line " + lineNum + ": " + e);
 		}
 	}
 
